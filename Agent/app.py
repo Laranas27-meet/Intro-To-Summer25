@@ -9,20 +9,34 @@ client = Anthropic(api_key=os.getenv('ANTHROPIC_API_KEY'))
 def run_chat():
     sum = 0
     print('You: (type exit to quit)')
-    Ai_personality = input("what personality should the ai have?")
-    system_message = Ai_personality
-    history = []
+    #Ai_personality = input("what personality should the ai have?")
+    goal = input("What is your goal out of this chat today? ")
+    system_message = """
+You are suzie, an mun assistant and researcher.
 
-    while True:
-        #repeat the same input and constantly ask the user until they type exit
+Your job is  to research and fact check different topics for mun comittees and you must provide all the necersary information the user must know about their topic and delegation.
+
+Rules:
+- Always start the conversation by mentioning your name and role
+- Always fact check each research and statement
+- Never provide false information
+- if a user asks you for interview practices or general practices rate them on a scale of 1 to 5 and explain why
+
+Response format:
+- Start with a one-sentence summary of what the user said.
+- Then give your response.
+- End with one follow-up question.
+"""
+    history = []
+    while True:   #repeat the same input and constantly ask the user until they type exit
         print(f"turn {len(history)//2}- you: ")
         user_input = input('>> ')
-
         if user_input.lower() == 'exit':
             break
         if user_input.lower() == 'reset':
             history = []
             print("history cleared")
+
 
         history.append({'role': 'user', 'content': user_input})
         #print('History:', history)
@@ -32,13 +46,14 @@ def run_chat():
             model='claude-haiku-4-5-20251001',
             max_tokens=300,
             #When i change the max tokens it basically limits the ai's respone, if the max tokens is 5 the respone must be five words or less.
-            temperature=1,
+            temperature=0.7,
+            system=system_message,
             #im assuming the temperature actually controls let's say the patience of the bot so one thing to note is that whne the temperature was 0 the bot stopped repeating the same respone after the second time whereas when i changed the temp to 1 it kept repeating it over and over           system=system_message,
             messages=history
         )
         reply = response.content[0].text
         #print(response)
-        print(f'Claude: {reply}')
+        print(f'Suzie: {reply}')
         print(f'the total tokens used: {sum}')
         total = response.usage.input_tokens + response.usage.output_tokens
         sum = sum + response.usage.input_tokens
@@ -65,3 +80,10 @@ run_chat()
 #I dont think the ai would behave any differently since the history is still there in the backend code we just dont see it in the terminal because we didnt print it 
 
 #I think the only bug i faced is with the sum because i put it outside of our main function so when i use the variable sum in the function it wouldn't have any value because it's original value was outside of the function 
+
+#if i try to ask the agents about different topics instead of mun it reccomends me to different agents who know about the subject im proposing instead of helping me itself because anything not mun related isnt it's speciality
+
+#I think in a way narritve and perspective, I think these factors shape how a person thinks and acts yet we dont usually see them or we dont know them 
+# if we deleted the system message I predict my ai bot wouldn't even function, the system message is sort of like it's identity it tell it hwo to act and what role to play, without it it wouldnt function 
+# I predict if i delete the "never provide false information" line the bot might do the exact opposite and provide false info because sometimes that's what ai tends to do. 
+# i think one bug i faced is when i tried to append the goal into the content line in the history list and all the bot focused on this the main goal and it didnt answwer any of my questions and kept sending the same reply 
